@@ -1,26 +1,55 @@
 <template>
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
-  <ElevatorCab/>
+  <span>elevators count: {{ elevators.length }}</span>
+  <span>levels: {{ levels }}</span>
+  <div class="elevators">
+    <ElevatorContainer v-for="(data, index) in elevators" v-bind:key="index" v-bind:data="data"/>
+  </div>
+  <button type="button" v-on:click="() => handleBtnClick(n)" v-for="n in levels" v-bind:key="n">Click {{ n }}</button>
 </template>
 
 <script>
-import ElevatorCab from "@/components/ElevatorCab";
+import ElevatorContainer from "@/components/ElevatorContainer";
 
 export default {
   name: 'App',
-  components: {
-    ElevatorCab
+  components: { ElevatorContainer },
+  data() {
+    return {
+      elevators: [],
+      levels: 5
+    }
+  },
+  mounted() {
+    this.elevators = this.makeElevators(3);
+  },
+  methods: {
+    handleBtnClick(destLevel) {
+      console.log(destLevel);
+    },
+    makeElevators(count) {
+      const resultArr = [];
+      for (let i = 0; i < count; i++) {
+        resultArr.push({
+          rest: false,
+          inMove: false,
+          ready: true,
+          level: 1,
+          tasks: []
+        });
+      }
+      return resultArr
+    }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+  .elevators {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 60%;
+    min-height: 70vh;
+    border: solid 1px black;
+  }
 </style>
