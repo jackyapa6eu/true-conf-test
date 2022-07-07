@@ -1,53 +1,50 @@
 <template>
   <span>elevators count: {{ elevators.length }}</span>
-  <span>levels: {{ levels }}</span>
+  <span>levels: {{ levels.length }}</span>
   <div class="main-content">
     <div class="elevators">
       <ElevatorContainer
         v-for="(data, index) in elevators"
         v-bind:key="index"
         v-bind:data="data"
-        v-bind:levelsCount="levels"
+        v-bind:levelsCount="levels.length"
       />
     </div>
     <div class="buttons">
-      <button type="button" v-on:click="() => handleBtnClick(n)" v-for="n in levels" v-bind:key="n">Click {{ n }}</button>
+      <ElevatorCallButton
+        v-for="(floor, index) in levels"
+        v-bind:key="index"
+        v-bind:handleClick="() => handleBtnClick(index)"
+        v-bind:floor="floor"
+      />
     </div>
   </div>
 </template>
 
 <script>
 import ElevatorContainer from "@/components/ElevatorContainer";
+import ElevatorCallButton from "@/components/ElevatorCallButton";
+import { elevatorCabObj, buttonCallObj } from "@/utils/defaultObjects";
+import { createInitialArray } from "@/utils/helpers";
 
 export default {
   name: 'App',
-  components: { ElevatorContainer },
+  components: { ElevatorContainer, ElevatorCallButton },
   data() {
     return {
       elevators: [],
-      levels: 8
+      levels: []
     }
   },
   mounted() {
-    this.elevators = this.makeElevators(3);
+    this.elevators = createInitialArray(elevatorCabObj, 3);
+    this.levels = createInitialArray(buttonCallObj, 6);
   },
   methods: {
     handleBtnClick(destLevel) {
-      this.findElevator(destLevel);
-    },
-    makeElevators(count) {
-      const resultArr = [];
-      for (let i = 0; i < count; i++) {
-        resultArr.push({
-          id: i + 1,
-          rest: false,
-          inMove: false,
-          ready: true,
-          level: 1,
-          tasks: []
-        });
-      }
-      return resultArr
+      console.log(destLevel);
+      const closestElevator = this.findElevator(destLevel);
+      this.moveElevator(closestElevator, destLevel);
     },
 
     findElevator(destLevel) {
@@ -56,10 +53,8 @@ export default {
         console.log('Лифт уже на этом этаже');
         return
       }
-      const closestElevator = this.findClosestElevator(freeElevators, destLevel);
-      this.moveElevator(closestElevator, destLevel);
-      //x.tasks.push(destLevel);
-      //closestElevator.level = destLevel;
+      return this.findClosestElevator(freeElevators, destLevel);
+
     },
 
     findClosestElevator(elevArr, destLevel) {
@@ -78,9 +73,7 @@ export default {
       return this.elevators.find(elev => elevArr[min.index] === elev);
     },
     getDiff(arr, lvl, pos) { return Math.abs(arr[pos].level - lvl) },
-    moveCabin(index) {
-      console.log(index);
-    },
+
     moveElevator(elevator, destLvl) {
       elevator.ready = false;
       elevator.inMove = true;

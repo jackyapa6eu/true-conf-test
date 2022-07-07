@@ -1,6 +1,6 @@
 <template>
   <div class="elevator-cab" v-bind:style="elevStyles">
-    <span>level: {{ data.level }}</span>
+    <span>level: {{ data.level + 1 }}</span>
     <span>RESTING? {{ data.rest }}</span>
   </div>
 </template>
@@ -14,15 +14,16 @@ export default {
     }
   },
   methods: {
-    goTo(level) {
-      console.log(level);
-    }
+
+  },
+  mounted() {
+    //console.log(this.data);
   },
   computed: {
     elevStyles: function () {
       return {
         height: `${100 / this.levelsCount}%`,
-        transform: `translateY(${-((this.data.level - 1) * 100)}%)`,
+        transform: `translateY(${-((this.data.level) * 100)}%)`,
         background: this.data.ready ? 'green' : 'red'
       }
     }
@@ -46,6 +47,6 @@ export default {
     border: solid 2px black;
     display: flex;
     box-sizing: border-box;
-    transition: transform 1s ease;
+    transition: transform 1s linear;
   }
 </style>
