@@ -1,7 +1,8 @@
 <template>
   <div class="elevator-cab" v-bind:style="elevStyles">
     <span>level: {{ data.level + 1 }}</span>
-    <span>RESTING? {{ data.rest }}</span>
+    <span>id: {{ data.id }}</span>
+    <span>{{ tasks }}</span>
   </div>
 </template>
 
@@ -17,7 +18,10 @@ export default {
 
   },
   mounted() {
-    //console.log(this.data);
+    //console.log(this.data.tasks);
+  },
+  beforeUpdate() {
+    //console.log('before update',this.data.tasks, this.data.id);
   },
   computed: {
     elevStyles: function () {
@@ -36,7 +40,8 @@ export default {
       level: Number,
       tasks: Array
     },
-    levelsCount: Number
+    levelsCount: Number,
+    tasks: Array
   }
 }
 </script>
@@ -46,6 +51,7 @@ export default {
     width: 120px;
     border: solid 2px black;
     display: flex;
+    flex-direction: column;
     box-sizing: border-box;
     transition: transform 1s linear;
   }

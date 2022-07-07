@@ -1,5 +1,5 @@
 <template>
-  <ElevatorCab v-bind:data="data" v-bind:levelsCount="levelsCount"/>
+  <ElevatorCab v-bind:data="data" v-bind:levelsCount="levelsCount" v-bind:tasks="tasks"/>
 </template>
 
 <script>
@@ -12,7 +12,8 @@ export default {
   },
   props: {
     data: Object,
-    levelsCount: Number
+    levelsCount: Number,
+    tasks: Array
   },
   data() {
     return {

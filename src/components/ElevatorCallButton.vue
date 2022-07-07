@@ -1,5 +1,11 @@
 <template>
-  <button type="button" v-on:click="callElevator">Click {{ floor.id + 1 }}</button>
+  <button
+    type="button"
+    v-on:click="callElevator"
+    v-bind:style="buttonStyles"
+  >
+    Click {{ floor.id + 1 }}
+  </button>
 </template>
 
 <script>
@@ -18,6 +24,13 @@ export default {
         return
       }
       this.handleClick();
+    }
+  },
+  computed: {
+    buttonStyles: function () {
+      return {
+        background: this.floor.pressed ? 'red' : 'green'
+      }
     }
   }
 }
