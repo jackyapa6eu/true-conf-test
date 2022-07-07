@@ -5,5 +5,5 @@ export const elevatorSettings = {
 
 export const buildingSettings = {
   elevatorsNumber: 2,
-  floorsNumber: 7
+  floorsNumber: 5
 }

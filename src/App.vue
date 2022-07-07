@@ -10,13 +10,14 @@
         v-bind:levelsCount="levels.length"
       />
     </div>
-    <div class="buttons">
-      <ElevatorCallButton
-        v-for="(floor, index) in levels"
-        v-bind:key="index"
-        v-bind:handleClick="() => handleBtnClick(index)"
-        v-bind:floor="floor"
-      />
+    <div class="floors">
+      <div class="floor" v-for="(floor, index) in levels" v-bind:key="index" v-bind:style="floorStyles">
+        <span class="floor__sign">{{index + 1}}</span>
+        <ElevatorCallButton
+          v-bind:handleClick="() => handleBtnClick(index)"
+          v-bind:floor="floor"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -24,7 +25,7 @@
 <script>
 import ElevatorCallButton from "@/components/ElevatorCallButton";
 import ElevatorCab from "@/components/ElevatorCab";
-import {elevatorSettings} from "@/constants/constants";
+import {buildingSettings, elevatorSettings} from "@/constants/constants";
 
 export default {
   name: 'App',
@@ -36,8 +37,8 @@ export default {
     }
   },
   mounted() {
-    this.elevators = this.createElevators(2);
-    this.levels = this.createLevels(10);
+    this.elevators = this.createElevators(buildingSettings.elevatorsNumber);
+    this.levels = this.createLevels(buildingSettings.floorsNumber);
   },
   methods: {
     handleBtnClick(destLevel) {
@@ -94,7 +95,6 @@ export default {
     },
 
     moveElevator(elevator, destLvl) {
-      //console.log(this.elevators);
       elevator.ready = false;
       elevator.inMove = true;
       if (elevator.level === destLvl) {
@@ -157,7 +157,16 @@ export default {
       }
       return resultArr
     }
-  }
+  },
+
+  computed: {
+    floorStyles: function () {
+      return {
+        height: `${100 / this.levels.length}%`
+      }
+    }
+  },
+
 }
 </script>
 
@@ -172,12 +181,35 @@ export default {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    min-height: 90vh;
-    border: solid 1px black;
+    min-height: 93vh;
+    border-right: solid 2px black;
+    background: #333333;
+    padding: 3px;
   }
-  .buttons {
+  .floors {
     display: flex;
     flex-direction: column-reverse;
     justify-content: space-around;
+  }
+  .floor {
+    position: relative;
+    background: gray;
+    width: 80px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    border-bottom: 2px black solid;
+    padding-left: 10px;
+  }
+  .floor__sign {
+    position: absolute;
+    text-align: center;
+    width: 30px;
+    background: #af9823;
+    border: solid 2px #796913;
+    color: yellow;
+    top: 3px;
+    right: 3px;
+    box-sizing: border-box;
   }
 </style>
