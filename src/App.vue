@@ -3,12 +3,11 @@
   <span>levels: {{ levels.length }}</span>
   <div class="main-content">
     <div class="elevators">
-      <ElevatorContainer
+      <ElevatorCab
         v-for="data in elevators"
-        v-bind:key="data.id"
         v-bind:data="data"
+        v-bind:key="data.id"
         v-bind:levelsCount="levels.length"
-        v-bind:tasks="data.tasks"
       />
     </div>
     <div class="buttons">
@@ -23,13 +22,13 @@
 </template>
 
 <script>
-import ElevatorContainer from "@/components/ElevatorContainer";
 import ElevatorCallButton from "@/components/ElevatorCallButton";
-
+import ElevatorCab from "@/components/ElevatorCab";
+import {elevatorSettings} from "@/constants/constants";
 
 export default {
   name: 'App',
-  components: { ElevatorContainer, ElevatorCallButton },
+  components: {ElevatorCab, ElevatorCallButton },
   data() {
     return {
       elevators: [],
@@ -38,15 +37,18 @@ export default {
   },
   mounted() {
     this.elevators = this.createElevators(2);
-    this.levels = this.createLevels(12);
+    this.levels = this.createLevels(10);
   },
   methods: {
     handleBtnClick(destLevel) {
       const closestElevator = this.findElevator(destLevel);
+      console.log(closestElevator);
       if (closestElevator) {
         this.levels[destLevel].pressed = true;
         closestElevator.tasks.push(destLevel);
-        this.moveElevator(closestElevator, destLevel);
+        if (closestElevator.ready) {
+          this.moveElevator(closestElevator, destLevel);
+        }
       }
     },
 
@@ -59,17 +61,30 @@ export default {
         return this.findClosestFreeElevator(freeElevators, destLevel);
       } else {
         console.log('ИЩЕМ ПОДХОДЯЩИЙ ЛИФТ');
+        const occupancyOfElevators = this.elevators.map((el) => {
+          const tasks = el.tasks.slice(0);
+          tasks.unshift(el.level);
+          let duration = 0;
+          if (tasks.length === 0) {
+            return 0
+          }
+          for (let i = 0; i < tasks.length - 1; i++) {
+            duration += Math.abs(tasks[i] - tasks[i + 1]);
+          }
+          return duration
+        });
+        return this.elevators[occupancyOfElevators.indexOf(Math.min(...occupancyOfElevators))];
       }
 
     },
 
     findClosestFreeElevator(elevArr, destLevel) {
       const min = {
-        diff: this.getDiff(elevArr, destLevel, 0),
+        diff: Math.abs(elevArr[0].level - destLevel),
         index: 0
       }
       for (let i = 1; i < elevArr.length; i++) {
-        const diff = this.getDiff(elevArr, destLevel, i)
+        const diff = Math.abs(elevArr[i].level - destLevel);
         if (diff < min.diff) {
           min.diff = diff;
           min.index = i;
@@ -78,8 +93,6 @@ export default {
       return this.elevators.find(elev => elevArr[min.index] === elev);
     },
 
-    getDiff(arr, lvl, pos) { return Math.abs(arr[pos].level - lvl) },
-
     moveElevator(elevator, destLvl) {
       //console.log(this.elevators);
       elevator.ready = false;
@@ -87,6 +100,8 @@ export default {
       if (elevator.level === destLvl) {
         elevator.inMove = false;
         elevator.rest = true;
+        elevator.down = false;
+        elevator.up = false;
         setTimeout(() => {
           elevator.rest = false;
           elevator.ready = true;
@@ -96,19 +111,21 @@ export default {
             this.moveElevator(elevator, elevator.tasks[0]);
           }
 
-        }, 1000);
+        }, elevatorSettings.restTime * 1000);
 
       } else if (elevator.level < destLvl) {
         elevator.level++;
+        elevator.up = true;
         setTimeout(() => {
           this.moveElevator(elevator, destLvl)
-        }, 1000);
+        }, elevatorSettings.speed * 1000);
 
       } else if (elevator.level > destLvl) {
         elevator.level--;
+        elevator.down = true;
         setTimeout(() => {
           this.moveElevator(elevator, destLvl)
-        }, 1000);
+        }, elevatorSettings.speed * 1000);
       }
 
     },
@@ -122,7 +139,9 @@ export default {
             inMove: false,
             ready: true,
             level: 0,
-            tasks: [3, 5, 1]
+            tasks: [],
+            down: false,
+            up: false
           });
         }
       return resultArr
@@ -143,6 +162,9 @@ export default {
 </script>
 
 <style>
+  body {
+    margin: 10px;
+  }
   .main-content {
     display: flex;
   }
@@ -150,8 +172,7 @@ export default {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    width: 60%;
-    min-height: 70vh;
+    min-height: 90vh;
     border: solid 1px black;
   }
   .buttons {

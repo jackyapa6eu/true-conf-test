@@ -1,36 +1,29 @@
 <template>
   <div class="elevator-cab" v-bind:style="elevStyles">
-    <span>level: {{ data.level + 1 }}</span>
-    <span>id: {{ data.id }}</span>
-    <span>{{ tasks }}</span>
+    <span>level: {{ data.level }}</span>
+    <span v-if="data.up">{{ 'UP' }}</span>
+    <span v-if="data.down">{{ 'DOWN' }}</span>
+    <span>{{ data.tasks }}</span>
   </div>
 </template>
 
 <script>
+import {elevatorSettings} from "@/constants/constants";
+
 export default {
   name: "ElevatorCab",
-  data() {
-    return {
-      currentLevel: 1
-    }
-  },
-  methods: {
-
-  },
-  mounted() {
-    //console.log(this.data.tasks);
-  },
-  beforeUpdate() {
-    //console.log('before update',this.data.tasks, this.data.id);
-  },
   computed: {
     elevStyles: function () {
       return {
         height: `${100 / this.levelsCount}%`,
         transform: `translateY(${-((this.data.level) * 100)}%)`,
-        background: this.data.ready ? 'green' : 'red'
+        background: this.data.ready ? 'green' : 'red',
+        transition: `transform ${elevatorSettings.speed}s linear`
       }
     }
+  },
+  mounted() {
+    console.log(this.data);
   },
   props: {
     data: {
@@ -38,10 +31,11 @@ export default {
       inMove: Boolean,
       ready: Boolean,
       level: Number,
-      tasks: Array
+      tasks: Array,
+      up: Boolean,
+      down: Boolean
     },
-    levelsCount: Number,
-    tasks: Array
+    levelsCount: Number
   }
 }
 </script>
@@ -53,6 +47,9 @@ export default {
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    transition: transform 1s linear;
+    margin-right: 10px;
+  }
+  .elevator-cab:last-child {
+    margin-right: 0;
   }
 </style>
