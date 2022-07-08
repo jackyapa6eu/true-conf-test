@@ -1,6 +1,8 @@
 <template>
-  <span>elevators count: {{ elevators.length }}</span>
-  <span>levels: {{ levels.length }}</span>
+  <input type="range" min="3" max="10" v-model.number="levelsCount" @change="handleSettingsChange">
+  <span>levels: {{ levelsCount }}</span>
+  <input type="range" min="1" max="5" v-model.number="elevatorsCount" @change="handleSettingsChange">
+  <span>elevators: {{ elevatorsCount }}</span>
   <div class="main-content">
     <div class="elevators">
       <ElevatorCab
@@ -25,7 +27,7 @@
 <script>
 import ElevatorCallButton from "@/components/ElevatorCallButton";
 import ElevatorCab from "@/components/ElevatorCab";
-import {buildingSettings, elevatorSettings} from "@/constants/constants";
+import {elevatorSettings} from "@/constants/constants";
 
 export default {
   name: 'App',
@@ -33,17 +35,34 @@ export default {
   data() {
     return {
       elevators: [],
-      levels: []
+      levels: [],
+      levelsCount: 5,
+      elevatorsCount: 2
     }
   },
   mounted() {
-    this.elevators = this.createElevators(buildingSettings.elevatorsNumber);
-    this.levels = this.createLevels(buildingSettings.floorsNumber);
+    const elevators = JSON.parse(localStorage.getItem('elevators'));
+    const levels = JSON.parse(localStorage.getItem('levels'));
+    if (elevators && levels) {
+      this.elevators = elevators;
+      this.levels = levels;
+      this.levelsCount = levels.length;
+      this.elevatorsCount = elevators.length;
+      const restingElevators = this.elevators.filter(el => el.rest); // нашли "отдыхающие" лифты
+      restingElevators.forEach(el => this.finishRest(el, el.level)); // завершили их "отдых"
+
+      const movingElevators = this.elevators.filter(el => el.inMove);
+      movingElevators.forEach(el => this.moveElevator(el, el.tasks[0]));
+
+    } else {
+      this.elevators = this.createElevators(this.elevatorsCount);
+      this.levels = this.createLevels(this.levelsCount);
+      this.saveAppCondition();
+    }
   },
   methods: {
     handleBtnClick(destLevel) {
       const closestElevator = this.findElevator(destLevel);
-      console.log(closestElevator);
       if (closestElevator) {
         this.levels[destLevel].pressed = true;
         closestElevator.tasks.push(destLevel);
@@ -52,16 +71,18 @@ export default {
         }
       }
     },
-
+    handleSettingsChange() {
+      this.levels = this.createLevels(this.levelsCount);
+      this.elevators = this.createElevators(this.elevatorsCount);
+      this.saveAppCondition();
+    },
     findElevator(destLevel) {
       const freeElevators = this.elevators.filter(elev => elev.ready); // найдем все свободные лифты
       if (freeElevators.find(elev => elev.level === destLevel)) {
-        console.log('Лифт уже на этом этаже');
         return false
       } else if (freeElevators.length > 0) {
         return this.findClosestFreeElevator(freeElevators, destLevel);
       } else {
-        console.log('ИЩЕМ ПОДХОДЯЩИЙ ЛИФТ');
         const occupancyOfElevators = this.elevators.map((el) => {
           const tasks = el.tasks.slice(0);
           tasks.unshift(el.level);
@@ -103,31 +124,38 @@ export default {
         elevator.down = false;
         elevator.up = false;
         setTimeout(() => {
-          elevator.rest = false;
-          elevator.ready = true;
-          elevator.tasks.shift();
-          this.levels[destLvl].pressed = false;
-          if (elevator.tasks.length > 0) {
-            this.moveElevator(elevator, elevator.tasks[0]);
-          }
-
+          this.finishRest(elevator, destLvl);
+          this.saveAppCondition();
         }, elevatorSettings.restTime * 1000);
 
       } else if (elevator.level < destLvl) {
         elevator.level++;
         elevator.up = true;
         setTimeout(() => {
-          this.moveElevator(elevator, destLvl)
+          this.moveElevator(elevator, destLvl);
+          this.saveAppCondition();
         }, elevatorSettings.speed * 1000);
 
       } else if (elevator.level > destLvl) {
         elevator.level--;
         elevator.down = true;
         setTimeout(() => {
-          this.moveElevator(elevator, destLvl)
+          this.moveElevator(elevator, destLvl);
+          this.saveAppCondition();
         }, elevatorSettings.speed * 1000);
       }
+      this.saveAppCondition();
+    },
 
+    finishRest(elevator, destLvl) {
+      elevator.rest = false;
+      elevator.ready = true;
+      elevator.tasks.shift();
+      this.levels[destLvl].pressed = false;
+      if (elevator.tasks.length > 0) {
+        this.moveElevator(elevator, elevator.tasks[0]);
+      }
+      this.saveAppCondition();
     },
 
     createElevators(count) {
@@ -156,6 +184,11 @@ export default {
         });
       }
       return resultArr
+    },
+
+    saveAppCondition() {
+      localStorage.setItem('elevators', JSON.stringify(this.elevators));
+      localStorage.setItem('levels', JSON.stringify(this.levels));
     }
   },
 
@@ -173,6 +206,7 @@ export default {
 <style>
   body {
     margin: 10px;
+    background: azure;
   }
   .main-content {
     display: flex;
@@ -181,7 +215,7 @@ export default {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    min-height: 93vh;
+    min-height: 91vh;
     border-right: solid 2px black;
     background: #333333;
     padding: 3px;
@@ -190,11 +224,12 @@ export default {
     display: flex;
     flex-direction: column-reverse;
     justify-content: space-around;
+    border-right: 2px solid black;
   }
   .floor {
     position: relative;
     background: gray;
-    width: 80px;
+    width: 150px;
     display: flex;
     align-items: center;
     box-sizing: border-box;

@@ -13,11 +13,11 @@
         v-if="data.inMove"
         class="elevator-cab__direction"
         src="../../images/elevator-cab__arrow.png"
+        alt="direction icon"
         v-bind:class="{ 'elevator-cab__direction_up': data.up }"
       />
       <span v-if="data.inMove" class="elevator-cab__destination">{{ data.tasks[0] + 1 }}</span>
     </div>
-
   </div>
 </template>
 
@@ -80,6 +80,8 @@ export default {
     width: 50%;
     height: 20px;
     background: #9b1313;
+    color: black;
+    font-weight: bold;
     box-shadow: 0 0 20px #9b1313;
     border: solid 2px #450505;
     box-sizing: border-box;
