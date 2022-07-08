@@ -4,7 +4,13 @@
     <div class="control-panel">
       <label class="control-panel__item">
         levels: {{ levelsCount }}
-        <input type="range" min="3" max="10" v-model.number="levelsCount" @change="handleSettingsChange">
+        <input
+          type="range"
+          v-bind:min="minFloors"
+          v-bind:max="maxFloors"
+          v-model.number="levelsCount"
+          @change="handleSettingsChange"
+        >
       </label>
       <label class="control-panel__item">
         elevators: {{ elevatorsCount }}
@@ -36,7 +42,7 @@
 <script>
 import ElevatorCallButton from "@/components/ElevatorCallButton";
 import ElevatorCab from "@/components/ElevatorCab";
-import {elevatorSettings} from "@/constants/constants";
+import { elevatorSettings } from "@/constants/constants";
 
 export default {
   name: 'App',
@@ -46,7 +52,14 @@ export default {
       elevators: [],
       levels: [],
       levelsCount: 5,
-      elevatorsCount: 2
+      elevatorsCount: 2,
+      // константы
+      // минимальное/максимальное количество этажей
+      minFloors: 3,
+      maxFloors: 10,
+      // минимальное/максимальное количество лифтов
+      minElevators: 1,
+      maxElevators: 5
     }
   },
   mounted() {
