@@ -13,7 +13,7 @@
 ```
 git clone https://github.com/jackyapa6eu/true-conf-test.git
 cd true-conf-test
-yarn install
+npm install
 ```
 
 ## Запуск
