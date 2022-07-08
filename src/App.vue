@@ -1,24 +1,33 @@
 <template>
-  <input type="range" min="3" max="10" v-model.number="levelsCount" @change="handleSettingsChange">
-  <span>levels: {{ levelsCount }}</span>
-  <input type="range" min="1" max="5" v-model.number="elevatorsCount" @change="handleSettingsChange">
-  <span>elevators: {{ elevatorsCount }}</span>
+
   <div class="main-content">
-    <div class="elevators">
-      <ElevatorCab
-        v-for="data in elevators"
-        v-bind:data="data"
-        v-bind:key="data.id"
-        v-bind:levelsCount="levels.length"
-      />
+    <div class="control-panel">
+      <label class="control-panel__item">
+        levels: {{ levelsCount }}
+        <input type="range" min="3" max="10" v-model.number="levelsCount" @change="handleSettingsChange">
+      </label>
+      <label class="control-panel__item">
+        elevators: {{ elevatorsCount }}
+        <input type="range" min="1" max="5" v-model.number="elevatorsCount" @change="handleSettingsChange">
+      </label>
     </div>
-    <div class="floors">
-      <div class="floor" v-for="(floor, index) in levels" v-bind:key="index" v-bind:style="floorStyles">
-        <span class="floor__sign">{{index + 1}}</span>
-        <ElevatorCallButton
-          v-bind:handleClick="() => handleBtnClick(index)"
-          v-bind:floor="floor"
+    <div class="building">
+      <div class="elevators">
+        <ElevatorCab
+          v-for="data in elevators"
+          v-bind:data="data"
+          v-bind:key="data.id"
+          v-bind:levelsCount="levels.length"
         />
+      </div>
+      <div class="floors">
+        <div class="floor" v-for="(floor, index) in levels" v-bind:key="index" v-bind:style="floorStyles">
+          <span class="floor__sign">{{index + 1}}</span>
+          <ElevatorCallButton
+            v-bind:handleClick="() => handleBtnClick(index)"
+            v-bind:floor="floor"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -205,11 +214,28 @@ export default {
 
 <style>
   body {
-    margin: 10px;
-    background: azure;
+    background: #ccfcfc;
+    margin: 0;
   }
   .main-content {
     display: flex;
+    flex-direction: column;
+    width: fit-content;
+  }
+  .control-panel {
+    height: 5vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    font-weight: bold;
+  }
+  .control-panel__item {
+    display: flex;
+  }
+  .building {
+    display: flex;
+    min-height: 95vh;
   }
   .elevators {
     display: flex;
