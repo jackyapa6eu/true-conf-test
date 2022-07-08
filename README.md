@@ -18,12 +18,16 @@ yarn install
 
 ## Запуск
 ```
-yarn serve
+npm run serve 
+
 ```
 
 ### Сборка
 ```
-yarn build
+npm run build
 ```
 
-## Статус проекта: `в разработке`
+## Статус проекта: `завершен`
+
+
+## [Ссылка на Github Pages](https://jackyapa6eu.github.io/true-conf-test/index.html)
